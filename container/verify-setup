@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+materials=/opt/elec3441/student-materials
+test_root=$(mktemp -d /tmp/elec3441-verify.XXXXXX)
+trap 'rm -rf "$test_root"' EXIT
+
+echo "Java: $(java -version 2>&1 | head -n 1)"
+echo "Native GCC: $(gcc -dumpfullversion -dumpversion)"
+echo "RISC-V GCC: $(riscv32-unknown-elf-gcc -dumpfullversion -dumpversion)"
+echo "Spike: $(/opt/spike/bin/spike --help 2>&1 | head -n 1)"
+echo "RARS: 1.6"
+echo "Logisim-Evolution: 4.1.0"
+echo "Ripes: 2.2.6"
+sudo -n true
+test "$(sudo -n id -u)" -eq 0
+echo "Student sudo: passwordless root command succeeds"
+python3 -c 'import matplotlib'
+echo "Python plotting: matplotlib imports successfully"
+test -x /usr/local/bin/pk
+echo "Proxy kernel: pinned RV32 pk is present"
+
+check_gui_starts() {
+  local name=$1
+  shift
+  local command_status
+
+  set +e
+  timeout 8s xvfb-run -a "$@" >"$test_root/${name}.log" 2>&1
+  command_status=$?
+  set -e
+
+  if (( command_status != 124 )); then
+    cat "$test_root/${name}.log" >&2
+    echo "$name did not remain running on the virtual display" >&2
+    return 1
+  fi
+  echo "$name: GUI starts on the virtual display"
+}
+
+check_gui_starts "Logisim-Evolution" logisim
+check_gui_starts "Ripes" ripes
+
+for handout in "$materials"/handouts/lab{1,2,3,4}.pdf "$materials"/handouts/homework{1,2,3}.pdf; do
+  test -s "$handout"
+done
+echo "Handouts: all four lab and three homework PDFs are present"
+
+for source in "$materials"/labs/lab1/*.c; do
+  for level in 0 1; do
+    riscv32-unknown-elf-gcc "-O${level}" -S "$source" -o "$test_root/$(basename "${source%.c}")-O${level}.s"
+  done
+done
+test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop1-O1.s")" -eq 2
+test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop2-O1.s")" -eq 1
+echo "Lab 1: all C files compile at O0 and O1; the loop-fusion comparison remains visible"
+
+for source in "$materials"/labs/lab2/*.s; do
+  rars nc a "$source" >/dev/null
+done
+echo "Lab 2: all starter assembly files assemble in RARS"
+
+xvfb-run -a logisim --new-file-format \
+  "$materials/labs/lab3/smallacc.circ" \
+  "$test_root/smallacc-current.circ" >/dev/null
+test -s "$test_root/smallacc-current.circ"
+echo "Lab 3: inherited circuit opens and converts in current Logisim-Evolution"
+
+for source in "$materials"/labs/lab4/*.s; do
+  rars nc a "$source" >/dev/null
+done
+echo "Lab 4: all starter assembly files assemble in RARS"
+
+cp -R "$materials/homeworks/hw1" "$test_root/hw1"
+xvfb-run -a logisim --new-file-format \
+  "$test_root/hw1/rv32_addi.circ" \
+  "$test_root/hw1/rv32_addi-current.circ" >/dev/null
+test -s "$test_root/hw1/rv32_addi-current.circ"
+for source in "$test_root"/hw1/test/*.s; do
+  expected="${source%.s}.expected.mem"
+  generated="${source%.s}.mem"
+  cp "$generated" "$expected"
+  (cd "$test_root/hw1/test" && ./s2mem.sh "$(basename "$source")" >/dev/null)
+  cmp "$expected" "$generated"
+done
+echo "Homework 1: Logisim starter converts and every assembly test regenerates its expected memory image"
+
+cp -R "$materials/homeworks/hw2" "$test_root/hw2"
+make -C "$test_root/hw2/benchmarks" >/dev/null
+spike_log="$test_root/hw2-kmean.log"
+(cd "$test_root/hw2/benchmarks/kmean" && \
+  timeout 120s spike --ic=128:1:32 --dc=256:1:32 --l2=1024:2:128 pk kmean) \
+  >"$spike_log" 2>&1
+grep -Fq 'Verification passed!' "$spike_log"
+grep -Fq 'I$ Read Accesses:' "$spike_log"
+grep -Fq 'D$ Read Accesses:' "$spike_log"
+grep -Fq 'L2$ Read Accesses:' "$spike_log"
+echo "Homework 2: all eight RV32 C/C++ benchmarks build; kmean passes with I-cache, D-cache, and L2 statistics"
+
+cp "$materials/homeworks/hw3/test_mmm_inter.c" "$test_root/test_mmm_inter.c"
+cp "$materials/homeworks/hw3/test_mmm_block.c" "$test_root/test_mmm_block.c"
+gcc -O3 -o "$test_root/test_mmm_inter" "$test_root/test_mmm_inter.c" -lrt
+gcc -O3 -o "$test_root/test_mmm_block" "$test_root/test_mmm_block.c" -lrt
+sed -e 's/^#define ITERS .*/#define ITERS 1/' \
+    -e 's/^#define DELTA .*/#define DELTA 16/' \
+    "$test_root/test_mmm_inter.c" >"$test_root/test_mmm_inter-smoke.c"
+sed -e 's/^#define MLENGTH .*/#define MLENGTH 32/' \
+    -e 's/^#define BITERS .*/#define BITERS 2/' \
+    -e 's/^#define BBASE .*/#define BBASE 4/' \
+    "$test_root/test_mmm_block.c" >"$test_root/test_mmm_block-smoke.c"
+gcc -O3 -o "$test_root/test_mmm_inter-smoke" "$test_root/test_mmm_inter-smoke.c" -lrt
+gcc -O3 -o "$test_root/test_mmm_block-smoke" "$test_root/test_mmm_block-smoke.c" -lrt
+timeout 30s "$test_root/test_mmm_inter-smoke" >"$test_root/test_mmm_inter.log"
+timeout 30s "$test_root/test_mmm_block-smoke" >"$test_root/test_mmm_block.log"
+grep -Fq 'length, N^3, ijk, kij, jki' "$test_root/test_mmm_inter.log"
+grep -Fq 'bsize = 8' "$test_root/test_mmm_block.log"
+echo "Homework 3: both native programs compile and reduced-size executions complete; timing values remain host-dependent"
+
+prepare-workspace
+test -s /workspace/handouts/homework3.pdf
+test -f /workspace/homeworks/hw1/rv32_addi.circ
+test -f /workspace/homeworks/hw2/benchmarks/Makefile
+test -f /workspace/homeworks/hw3/test_mmm_inter.c
+echo "Workspace: labs, homeworks, and handouts copy into student-writable storage"
+
+echo "ELEC3441 student image verification passed"

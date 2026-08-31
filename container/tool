@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "$(basename "$0")" in
+  rars)
+    exec java -jar /opt/rars/rars.jar "$@"
+    ;;
+  logisim)
+    exec java -jar /opt/logisim/logisim.jar "$@"
+    ;;
+  ripes)
+    exec /opt/ripes/bin/Ripes "$@"
+    ;;
+  spike)
+    has_isa=0
+    spike_args=()
+    for arg in "$@"; do
+      case "$arg" in
+        --isa|--isa=*) has_isa=1 ;;
+        pk) arg=/usr/local/bin/pk ;;
+      esac
+      spike_args+=("$arg")
+    done
+    if (( has_isa )); then
+      exec /opt/spike/bin/spike "${spike_args[@]}"
+    fi
+    exec /opt/spike/bin/spike --isa=rv32i_zicsr_zifencei "${spike_args[@]}"
+    ;;
+  riscv32-unknown-elf-gcc)
+    exec /opt/riscv/bin/riscv-none-elf-gcc -march=rv32i -mabi=ilp32 "$@"
+    ;;
+  riscv32-unknown-elf-g++)
+    exec /opt/riscv/bin/riscv-none-elf-g++ -march=rv32i -mabi=ilp32 "$@"
+    ;;
+  riscv32-unknown-elf-objdump)
+    exec /opt/riscv/bin/riscv-none-elf-objdump "$@"
+    ;;
+  riscv32-unknown-elf-objcopy)
+    exec /opt/riscv/bin/riscv-none-elf-objcopy "$@"
+    ;;
+  riscv32-unknown-elf-ld)
+    exec /opt/riscv/bin/riscv-none-elf-ld -melf32lriscv "$@"
+    ;;
+  riscv32-unknown-elf-as|riscv32-unknown-elf-gas)
+    exec /opt/riscv/bin/riscv-none-elf-as -march=rv32i -mabi=ilp32 "$@"
+    ;;
+  *)
+    echo "Unknown ELEC3441 tool: $(basename "$0")" >&2
+    exit 2
+    ;;
+esac

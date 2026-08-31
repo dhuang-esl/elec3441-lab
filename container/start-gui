@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (( $# > 0 )); then
+  exec "$@"
+fi
+
+/usr/local/bin/prepare-workspace
+
+Xvfb :0 -screen 0 1600x900x24 -ac +extension GLX +render -noreset >/tmp/xvfb.log 2>&1 &
+xvfb_pid=$!
+
+for _ in {1..100}; do
+  if [[ -S /tmp/.X11-unix/X0 ]]; then
+    break
+  fi
+  if ! kill -0 "$xvfb_pid" 2>/dev/null; then
+    cat /tmp/xvfb.log >&2
+    exit 1
+  fi
+  sleep 0.1
+done
+
+if [[ ! -S /tmp/.X11-unix/X0 ]]; then
+  echo "The virtual display did not become ready" >&2
+  cat /tmp/xvfb.log >&2
+  exit 1
+fi
+
+fluxbox >/tmp/fluxbox.log 2>&1 &
+x11vnc -display :0 -forever -shared -nopw -rfbport 5900 >/tmp/x11vnc.log 2>&1 &
+websockify --web=/usr/share/novnc 6080 localhost:5900 >/tmp/novnc.log 2>&1 &
+novnc_pid=$!
+xterm -geometry 120x36 -title "ELEC3441 Lab Workspace" -e bash -lc \
+  'cd /workspace; printf "ELEC3441 is ready.\nLabs: /workspace/labs\nHomeworks: /workspace/homeworks\nHandouts: /workspace/handouts\nGUI tools: rars, logisim, ripes\n\n"; exec bash' \
+  >/tmp/xterm.log 2>&1 &
+
+wait "$novnc_pid"

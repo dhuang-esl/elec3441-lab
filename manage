@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir=$(cd "$(dirname "$0")" && pwd)
+image=${ELEC3441_IMAGE:-elec3441-lab:2026.3}
+container=elec3441-lab
+volume=elec3441-work
+
+case "${1:-}" in
+  build)
+    docker build --tag "$image" "$script_dir"
+    ;;
+  verify)
+    docker run --rm \
+      "$image" verify-setup
+    ;;
+  up)
+    docker volume create "$volume" >/dev/null
+    if docker container inspect "$container" >/dev/null 2>&1; then
+      docker rm --force "$container" >/dev/null
+    fi
+    docker run --detach \
+      --name "$container" \
+      --publish 127.0.0.1:6080:6080 \
+      --shm-size 1gb \
+      --volume "$volume:/workspace" \
+      "$image" >/dev/null
+    echo "ELEC3441 GUI: http://localhost:6080/vnc.html?autoconnect=1&resize=scale"
+    ;;
+  stop)
+    docker stop "$container" >/dev/null
+    ;;
+  shell)
+    docker exec --interactive --tty "$container" bash
+    ;;
+  status)
+    docker ps --all --filter "name=^/${container}$"
+    ;;
+  *)
+    echo "Usage: ./manage {build|verify|up|stop|shell|status}" >&2
+    exit 2
+    ;;
+esac
