@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-materials=/opt/elec3441/student-materials
+materials=/workspace
 release_manifest="$materials/release-manifest.txt"
 test_root=$(mktemp -d /tmp/elec3441-verify.XXXXXX)
 trap 'rm -rf "$test_root"' EXIT
@@ -42,7 +42,7 @@ while IFS= read -r -d '' material_file; do
     echo "Student material is not listed for release: $relative_path" >&2
     exit 1
   fi
-done < <(find "$materials/labs" "$materials/homeworks" "$materials/handouts" -type f -print0)
+done < <(find "$materials" -mindepth 2 -type f ! -name .DS_Store -print0)
 
 echo "Released materials: $released_count manifest entries are present"
 
@@ -167,12 +167,6 @@ if [[ -d "$materials/homeworks/hw3" ]]; then
   echo "Homework 3: both native programs compile and reduced-size executions complete; timing values remain host-dependent"
 fi
 
-prepare-workspace
-while IFS= read -r released_path || [[ -n "$released_path" ]]; do
-  released_path=${released_path%$'\r'}
-  [[ -z "$released_path" || "$released_path" == \#* ]] && continue
-  test -e "/workspace/$released_path"
-done < "$release_manifest"
-echo "Workspace: every released material copies into student-writable storage"
+echo "Workspace: every released material is available from the host bind mount"
 
 echo "ELEC3441 student image verification passed"

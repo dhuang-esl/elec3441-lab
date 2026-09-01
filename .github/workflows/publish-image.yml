@@ -59,6 +59,14 @@ jobs:
           cache-from: type=gha,scope=elec3441-${{ matrix.suffix }}
           cache-to: type=gha,mode=max,scope=elec3441-${{ matrix.suffix }}
 
+      - name: Verify ${{ matrix.platform }} image and released materials
+        run: |
+          image="${REGISTRY}/${IMAGE_NAME}:build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${{ matrix.suffix }}"
+          docker pull "$image"
+          docker run --rm \
+            --mount "type=bind,source=${GITHUB_WORKSPACE}/student-materials,target=/workspace,readonly" \
+            "$image" verify-setup
+
   publish:
     name: Assemble multi-platform image
     needs: build

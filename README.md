@@ -6,7 +6,7 @@ Its published Docker image pins the RISC-V GNU C/C++ toolchain, Spike and the RV
 
 The published image supports Intel/AMD and Apple Silicon. Its graphical tools run in a browser, so students use the same Linux environment on macOS, Windows, or Linux.
 
-The repository releases course materials progressively. Student work is stored separately in the persistent Docker volume and is not overwritten by later releases.
+The repository releases course materials progressively. The host directory `student-materials` is mounted directly at `/workspace` inside the container, so edits made in either place are the same files.
 
 For platform-specific installation instructions, see [ELEC3441 Docker Quick Start](ELEC3441_Docker_Quick_Start.docx).
 
@@ -31,14 +31,14 @@ Download the verified image, check it, and start the environment:
 
 The repository's [`image.ref`](image.ref) pins an immutable, verified image. Students do not need to enter a registry address or build the image themselves. The first pull can take several minutes depending on the internet connection.
 
-Open <http://localhost:6080/vnc.html?autoconnect=1&resize=scale>. Working files persist in the Docker volume `elec3441-work` when the container is stopped or recreated.
+Open <http://localhost:6080/vnc.html?autoconnect=1&resize=scale>. Working files persist in the cloned repository when the container is stopped, recreated, or deleted.
 
-On first start, the image copies the currently released materials into:
+The single bind mount maps these paths:
 
-- `/workspace/labs/lab1`
-- `/workspace/handouts/lab1.pdf`
+- Host `student-materials/labs/lab1` → container `/workspace/labs/lab1`
+- Host `student-materials/handouts/lab1.pdf` → container `/workspace/handouts/lab1.pdf`
 
-Running `prepare-workspace` later adds any newly released files without replacing existing student work.
+The Docker image contains only the software environment. Course files come from the Git checkout, not from the image.
 
 Launch the graphical tools from the desktop terminal with `rars`, `logisim`, or `ripes`.
 
@@ -49,11 +49,11 @@ sudo apt-get update
 sudo apt-get install <package>
 ```
 
-Changes under `/workspace` persist in the `elec3441-work` volume. System packages installed with `sudo` belong to that particular container and are lost if `./manage up` recreates it; add anything required for the whole class to the Dockerfile and rebuild the image instead.
+Changes under `/workspace` immediately update the host's `student-materials` directory. System packages installed with `sudo` belong to that particular container and are lost if `./manage up` recreates it; tell the teaching team if the whole class needs an additional package.
 
 ## Use VS Code
 
-For editing C, C++, or assembly, use VS Code with Microsoft's **Dev Containers** extension:
+You can open the cloned repository directly in VS Code and edit files under `student-materials`. To use a terminal inside the course container, either run `./manage shell` or use Microsoft's **Dev Containers** extension:
 
 1. Run `./manage up`.
 2. In the VS Code Command Palette, choose **Dev Containers: Attach to Running Container...** and select `elec3441-lab`.
@@ -70,26 +70,19 @@ Use `./manage stop` to stop the GUI, `./manage status` to inspect it, and `./man
 
 ## Keep your work in Git
 
-Git is installed inside the student image. The course repository is the read-only release source; do not push personal work to it. If you want version history or an online backup, create your own private GitHub repository and initialize it under `/workspace`:
+The cloned course repository is also your working copy. You may commit your changes locally, create your own branch, or connect a private fork for backup. Do not push student work to the official course repository.
 
-```sh
-cd /workspace
-git init
-git branch -M main
-git remote add origin https://github.com/YOUR_ACCOUNT/YOUR_PRIVATE_REPOSITORY.git
-```
-
-Then commit and push your `labs` and `homeworks` directories normally. VS Code Dev Containers can reuse Git credentials configured on the host computer.
+Before pulling a course update, use `git status` and commit or stash unfinished changes. If an instructor update changes the same file, Git will ask you to resolve the conflict instead of silently overwriting your work.
 
 ## Receive later course releases
 
-When the teaching team announces an update, run these commands from the cloned repository:
+When the teaching team announces new material, run these commands from the cloned repository after committing or stashing your changes:
 
 ```sh
-git pull --ff-only
-./manage pull
+git status
+git pull
 ./manage verify
 ./manage up
 ```
 
-Their existing files under `/workspace` remain in the `elec3441-work` volume. See [PUBLISHING.md](PUBLISHING.md) for the instructor release procedure.
+If the teaching team also announces a software-environment update, run `./manage pull` after `git pull`. See [PUBLISHING.md](PUBLISHING.md) for the instructor release procedure.

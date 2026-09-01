@@ -167,12 +167,9 @@ COPY --from=pk-builder /opt/pk /opt/pk
 
 COPY container/tool /usr/local/bin/elec3441-tool
 COPY container/start-gui /usr/local/bin/start-gui
-COPY container/prepare-workspace /usr/local/bin/prepare-workspace
 COPY container/verify-setup /usr/local/bin/verify-setup
-COPY student-materials /opt/elec3441/student-materials
 
-RUN chmod 755 /usr/local/bin/elec3441-tool /usr/local/bin/start-gui /usr/local/bin/prepare-workspace /usr/local/bin/verify-setup \
-    && chmod -R a+rX /opt/elec3441/student-materials \
+RUN chmod 755 /usr/local/bin/elec3441-tool /usr/local/bin/start-gui /usr/local/bin/verify-setup \
     && for tool in rars logisim ripes spike riscv32-unknown-elf-gcc riscv32-unknown-elf-g++ riscv32-unknown-elf-objdump riscv32-unknown-elf-objcopy riscv32-unknown-elf-ld riscv32-unknown-elf-as riscv32-unknown-elf-gas; do \
       ln -s /usr/local/bin/elec3441-tool "/usr/local/bin/${tool}"; \
     done \

@@ -1,62 +1,84 @@
-# Publishing an ELEC3441 release
+# Publishing ELEC3441 materials and environment images
 
-The repository releases student materials progressively. Only paths listed in
-`student-materials/release-manifest.txt` are allowed into a verified image.
-Verification fails if another file is accidentally left under `labs`,
-`homeworks`, or `handouts`.
+Course materials and the Docker image have separate release cycles. The image
+contains only the software environment. Students receive labs, homework, and
+handouts through Git and bind-mount `student-materials` at `/workspace`.
 
-## 1. Check the release locally
+Only paths listed in `student-materials/release-manifest.txt` are accepted by
+verification. Do not include solutions, marking material, or instructor-only
+expected results in this repository.
+
+## 1. Release course material
+
+Add the new student-facing files under `student-materials`, then add each
+released file or directory to `student-materials/release-manifest.txt`.
+
+Verify the current material against the pinned environment image:
+
+```sh
+./manage pull
+./manage verify
+git diff --check
+git status --short
+```
+
+Review the listed changes, stage only the intended release files, then commit
+and push `main`. A materials-only release does not require a Docker build or Git
+tag.
+
+```sh
+git add student-materials
+git commit -m "Release the next ELEC3441 materials"
+git push origin main
+```
+
+Students receive the release with `git pull`. Because they edit the same tracked
+files through the bind mount, announce any correction to a previously released
+file so they know that Git may require a merge.
+
+## 2. Publish a software-environment image
+
+Publish a new image only when the Dockerfile, installed tools, or container
+scripts change. Check it locally first:
 
 ```sh
 ./manage build
 ELEC3441_IMAGE=elec3441-lab:local ./manage verify
 ```
 
-## 2. Publish a version
-
-Commit and push the release, then create a new version tag:
+Choose a new, unused tag and never move or reuse a published tag:
 
 ```sh
-git add .
-git commit -m "Prepare ELEC3441 release v2026.1"
+release_tag=v2026.2
+test -z "$(git tag --list "$release_tag")"
+
+git add Dockerfile .dockerignore container manage .github/workflows/publish-image.yml
+git commit -m "Prepare ELEC3441 environment $release_tag"
 git push origin main
-git tag v2026.1
-git push origin v2026.1
+git tag "$release_tag"
+git push origin "$release_tag"
 ```
 
-The `Publish course image` GitHub Actions workflow builds AMD64 and ARM64 on
-separate native GitHub runners, assembles one multi-platform image, and
-publishes it to `ghcr.io/dhuang-esl/elec3441-lab`.
-
-For the first release, open the package settings on GitHub and change the
-package visibility to Public. Public visibility lets students pull the image
-without a GitHub login or token.
+The `Publish course image` workflow builds and verifies AMD64 and ARM64 on
+separate native runners, assembles one multi-platform image, and publishes it
+to `ghcr.io/dhuang-esl/elec3441-lab`.
 
 ## 3. Pin the published digest
 
-Open the completed workflow run and copy the immutable image reference from its
-summary. Copy `image.ref.example` to `image.ref`, replace the placeholder with
-that reference, then commit and push `image.ref`:
+After the workflow succeeds, copy its immutable image reference into the single
+line in `image.ref`, then commit and push that update:
 
 ```sh
-cp image.ref.example image.ref
 git add image.ref
-git commit -m "Pin the v2026.1 student image"
+git commit -m "Pin verified ELEC3441 environment image"
 git push origin main
 ```
 
-The file must contain exactly one reference, for example:
+The file must contain exactly one reference:
 
 ```text
 ghcr.io/dhuang-esl/elec3441-lab@sha256:0123456789abcdef...
 ```
 
-## 4. Release later material
-
-Add only the new student-facing files. Add each released file or directory to
-`student-materials/release-manifest.txt`, run the local verification again, and
-publish the next tag. After the workflow succeeds, replace `image.ref` with the
-new digest and push that one-file update.
-
-Do not include solutions, marking material, or instructor-only expected results
-in the repository or image.
+Keep the GHCR package Public and confirm that a machine without a GitHub login
+can pull the pinned reference.

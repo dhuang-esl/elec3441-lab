@@ -5,7 +5,7 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 local_image=${ELEC3441_LOCAL_IMAGE:-elec3441-lab:local}
 image_ref_file="$script_dir/image.ref"
 container=elec3441-lab
-volume=elec3441-work
+workspace="$script_dir/student-materials"
 
 if [[ -n "${ELEC3441_IMAGE:-}" ]]; then
   image=$ELEC3441_IMAGE
@@ -28,10 +28,10 @@ case "${1:-}" in
     ;;
   verify)
     docker run --rm \
+      --mount "type=bind,source=$workspace,target=/workspace,readonly" \
       "$image" verify-setup
     ;;
   up)
-    docker volume create "$volume" >/dev/null
     if docker container inspect "$container" >/dev/null 2>&1; then
       docker rm --force "$container" >/dev/null
     fi
@@ -39,7 +39,7 @@ case "${1:-}" in
       --name "$container" \
       --publish 127.0.0.1:6080:6080 \
       --shm-size 1gb \
-      --volume "$volume:/workspace" \
+      --mount "type=bind,source=$workspace,target=/workspace" \
       "$image" >/dev/null
     echo "ELEC3441 GUI: http://localhost:6080/vnc.html?autoconnect=1&resize=scale"
     ;;
