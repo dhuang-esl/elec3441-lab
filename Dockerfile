@@ -131,6 +131,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dbus-x11 \
     device-tree-compiler \
     fluxbox \
+    git \
     libfontconfig1 \
     libgl1 \
     libglib2.0-0 \

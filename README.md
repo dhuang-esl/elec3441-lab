@@ -4,6 +4,8 @@ This student package contains four lab handouts, three homework handouts, and th
 
 The image builds natively on Intel/AMD or Apple Silicon. Its graphical tools run in a browser, so students use the same Linux environment on macOS, Windows, or Linux.
 
+The repository releases course materials progressively. Student work is stored separately in the persistent Docker volume and is not overwritten by later releases.
+
 ## Start the course environment
 
 Install Docker Desktop, unpack this package, open a terminal in this directory, and run:
@@ -56,6 +58,19 @@ The browser desktop remains available for Logisim, RARS, and Ripes.
 
 Use `./manage stop` to stop the GUI, `./manage status` to inspect it, and `./manage shell` to open a terminal in the running container.
 
+## Keep your work in Git
+
+Git is installed inside the student image. The course repository is the read-only release source; do not push personal work to it. If you want version history or an online backup, create your own private GitHub repository and initialize it under `/workspace`:
+
+```sh
+cd /workspace
+git init
+git branch -M main
+git remote add origin https://github.com/YOUR_ACCOUNT/YOUR_PRIVATE_REPOSITORY.git
+```
+
+Then commit and push your `labs` and `homeworks` directories normally. VS Code Dev Containers can reuse Git credentials configured on the host computer.
+
 ## Share with students
 
 You may give students this entire package so they can build it locally. For a faster and more reproducible release, publish the verified image to a course registry and pin its immutable digest. Students can then set the published image before starting:
@@ -67,3 +82,14 @@ export ELEC3441_IMAGE=ghcr.io/COURSE/elec3441-lab@sha256:DIGEST
 ```
 
 Replace the example with the actual registry path and digest after the image is published. The browser desktop listens only on `127.0.0.1`; do not expose its passwordless noVNC port directly to the internet.
+
+When this repository contains `image.ref`, `./manage pull`, `./manage verify`, and `./manage up` use that pinned image automatically. Students receive a later release with:
+
+```sh
+git pull --ff-only
+./manage pull
+./manage verify
+./manage up
+```
+
+Their existing files under `/workspace` remain in the `elec3441-work` volume. See [PUBLISHING.md](PUBLISHING.md) for the instructor release procedure.

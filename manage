@@ -2,13 +2,29 @@
 set -euo pipefail
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
-image=${ELEC3441_IMAGE:-elec3441-lab:2026.3}
+local_image=${ELEC3441_LOCAL_IMAGE:-elec3441-lab:local}
+image_ref_file="$script_dir/image.ref"
 container=elec3441-lab
 volume=elec3441-work
 
+if [[ -n "${ELEC3441_IMAGE:-}" ]]; then
+  image=$ELEC3441_IMAGE
+elif [[ -s "$image_ref_file" ]]; then
+  read -r image < "$image_ref_file"
+else
+  image=$local_image
+fi
+
 case "${1:-}" in
   build)
-    docker build --tag "$image" "$script_dir"
+    docker build --tag "$local_image" "$script_dir"
+    echo "Built local image: $local_image"
+    if [[ "$image" != "$local_image" ]]; then
+      echo "Verify it with: ELEC3441_IMAGE=$local_image ./manage verify"
+    fi
+    ;;
+  pull)
+    docker pull "$image"
     ;;
   verify)
     docker run --rm \
@@ -37,7 +53,7 @@ case "${1:-}" in
     docker ps --all --filter "name=^/${container}$"
     ;;
   *)
-    echo "Usage: ./manage {build|verify|up|stop|shell|status}" >&2
+    echo "Usage: ./manage {build|pull|verify|up|stop|shell|status}" >&2
     exit 2
     ;;
 esac

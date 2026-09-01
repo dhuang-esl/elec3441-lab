@@ -2,10 +2,52 @@
 set -euo pipefail
 
 materials=/opt/elec3441/student-materials
+release_manifest="$materials/release-manifest.txt"
 test_root=$(mktemp -d /tmp/elec3441-verify.XXXXXX)
 trap 'rm -rf "$test_root"' EXIT
 
+test -s "$release_manifest"
+released_count=0
+released_paths=()
+while IFS= read -r released_path || [[ -n "$released_path" ]]; do
+  released_path=${released_path%$'\r'}
+  [[ -z "$released_path" || "$released_path" == \#* ]] && continue
+  if [[ "$released_path" == /* || "$released_path" == ../* || "$released_path" == */../* || "$released_path" == */.. ]]; then
+    echo "Unsafe path in release manifest: $released_path" >&2
+    exit 1
+  fi
+  case "$released_path" in
+    labs/*|homeworks/*|handouts/*) ;;
+    *)
+      echo "Release path must be under labs, homeworks, or handouts: $released_path" >&2
+      exit 1
+      ;;
+  esac
+  test -e "$materials/$released_path"
+  released_paths+=("$released_path")
+  ((released_count += 1))
+done < "$release_manifest"
+test "$released_count" -gt 0
+
+while IFS= read -r -d '' material_file; do
+  relative_path=${material_file#"$materials/"}
+  covered=0
+  for released_path in "${released_paths[@]}"; do
+    if [[ "$relative_path" == "$released_path" || "$relative_path" == "$released_path/"* ]]; then
+      covered=1
+      break
+    fi
+  done
+  if (( covered == 0 )); then
+    echo "Student material is not listed for release: $relative_path" >&2
+    exit 1
+  fi
+done < <(find "$materials/labs" "$materials/homeworks" "$materials/handouts" -type f -print0)
+
+echo "Released materials: $released_count manifest entries are present"
+
 echo "Java: $(java -version 2>&1 | head -n 1)"
+echo "Git: $(git --version)"
 echo "Native GCC: $(gcc -dumpfullversion -dumpversion)"
 echo "RISC-V GCC: $(riscv32-unknown-elf-gcc -dumpfullversion -dumpversion)"
 echo "Spike: $(/opt/spike/bin/spike --help 2>&1 | head -n 1)"
@@ -41,86 +83,96 @@ check_gui_starts() {
 check_gui_starts "Logisim-Evolution" logisim
 check_gui_starts "Ripes" ripes
 
-for handout in "$materials"/handouts/lab{1,2,3,4}.pdf "$materials"/handouts/homework{1,2,3}.pdf; do
-  test -s "$handout"
-done
-echo "Handouts: all four lab and three homework PDFs are present"
-
-for source in "$materials"/labs/lab1/*.c; do
-  for level in 0 1; do
-    riscv32-unknown-elf-gcc "-O${level}" -S "$source" -o "$test_root/$(basename "${source%.c}")-O${level}.s"
+if [[ -d "$materials/labs/lab1" ]]; then
+  for source in "$materials"/labs/lab1/*.c; do
+    for level in 0 1; do
+      riscv32-unknown-elf-gcc "-O${level}" -S "$source" -o "$test_root/$(basename "${source%.c}")-O${level}.s"
+    done
   done
-done
-test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop1-O1.s")" -eq 2
-test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop2-O1.s")" -eq 1
-echo "Lab 1: all C files compile at O0 and O1; the loop-fusion comparison remains visible"
+  test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop1-O1.s")" -eq 2
+  test "$(grep -Ec '^[[:space:]]+bne[[:space:]]' "$test_root/loop2-O1.s")" -eq 1
+  echo "Lab 1: all C files compile at O0 and O1; the loop-fusion comparison remains visible"
+fi
 
-for source in "$materials"/labs/lab2/*.s; do
-  rars nc a "$source" >/dev/null
-done
-echo "Lab 2: all starter assembly files assemble in RARS"
+if [[ -d "$materials/labs/lab2" ]]; then
+  for source in "$materials"/labs/lab2/*.s; do
+    rars nc a "$source" >/dev/null
+  done
+  echo "Lab 2: all starter assembly files assemble in RARS"
+fi
 
-xvfb-run -a logisim --new-file-format \
-  "$materials/labs/lab3/smallacc.circ" \
-  "$test_root/smallacc-current.circ" >/dev/null
-test -s "$test_root/smallacc-current.circ"
-echo "Lab 3: inherited circuit opens and converts in current Logisim-Evolution"
+if [[ -d "$materials/labs/lab3" ]]; then
+  xvfb-run -a logisim --new-file-format \
+    "$materials/labs/lab3/smallacc.circ" \
+    "$test_root/smallacc-current.circ" >/dev/null
+  test -s "$test_root/smallacc-current.circ"
+  echo "Lab 3: inherited circuit opens and converts in current Logisim-Evolution"
+fi
 
-for source in "$materials"/labs/lab4/*.s; do
-  rars nc a "$source" >/dev/null
-done
-echo "Lab 4: all starter assembly files assemble in RARS"
+if [[ -d "$materials/labs/lab4" ]]; then
+  for source in "$materials"/labs/lab4/*.s; do
+    rars nc a "$source" >/dev/null
+  done
+  echo "Lab 4: all starter assembly files assemble in RARS"
+fi
 
-cp -R "$materials/homeworks/hw1" "$test_root/hw1"
-xvfb-run -a logisim --new-file-format \
-  "$test_root/hw1/rv32_addi.circ" \
-  "$test_root/hw1/rv32_addi-current.circ" >/dev/null
-test -s "$test_root/hw1/rv32_addi-current.circ"
-for source in "$test_root"/hw1/test/*.s; do
-  expected="${source%.s}.expected.mem"
-  generated="${source%.s}.mem"
-  cp "$generated" "$expected"
-  (cd "$test_root/hw1/test" && ./s2mem.sh "$(basename "$source")" >/dev/null)
-  cmp "$expected" "$generated"
-done
-echo "Homework 1: Logisim starter converts and every assembly test regenerates its expected memory image"
+if [[ -d "$materials/homeworks/hw1" ]]; then
+  cp -R "$materials/homeworks/hw1" "$test_root/hw1"
+  xvfb-run -a logisim --new-file-format \
+    "$test_root/hw1/rv32_addi.circ" \
+    "$test_root/hw1/rv32_addi-current.circ" >/dev/null
+  test -s "$test_root/hw1/rv32_addi-current.circ"
+  for source in "$test_root"/hw1/test/*.s; do
+    expected="${source%.s}.expected.mem"
+    generated="${source%.s}.mem"
+    cp "$generated" "$expected"
+    (cd "$test_root/hw1/test" && ./s2mem.sh "$(basename "$source")" >/dev/null)
+    cmp "$expected" "$generated"
+  done
+  echo "Homework 1: Logisim starter converts and every assembly test regenerates its expected memory image"
+fi
 
-cp -R "$materials/homeworks/hw2" "$test_root/hw2"
-make -C "$test_root/hw2/benchmarks" >/dev/null
-spike_log="$test_root/hw2-kmean.log"
-(cd "$test_root/hw2/benchmarks/kmean" && \
-  timeout 120s spike --ic=128:1:32 --dc=256:1:32 --l2=1024:2:128 pk kmean) \
-  >"$spike_log" 2>&1
-grep -Fq 'Verification passed!' "$spike_log"
-grep -Fq 'I$ Read Accesses:' "$spike_log"
-grep -Fq 'D$ Read Accesses:' "$spike_log"
-grep -Fq 'L2$ Read Accesses:' "$spike_log"
-echo "Homework 2: all eight RV32 C/C++ benchmarks build; kmean passes with I-cache, D-cache, and L2 statistics"
+if [[ -d "$materials/homeworks/hw2" ]]; then
+  cp -R "$materials/homeworks/hw2" "$test_root/hw2"
+  make -C "$test_root/hw2/benchmarks" >/dev/null
+  spike_log="$test_root/hw2-kmean.log"
+  (cd "$test_root/hw2/benchmarks/kmean" && \
+    timeout 120s spike --ic=128:1:32 --dc=256:1:32 --l2=1024:2:128 pk kmean) \
+    >"$spike_log" 2>&1
+  grep -Fq 'Verification passed!' "$spike_log"
+  grep -Fq 'I$ Read Accesses:' "$spike_log"
+  grep -Fq 'D$ Read Accesses:' "$spike_log"
+  grep -Fq 'L2$ Read Accesses:' "$spike_log"
+  echo "Homework 2: all eight RV32 C/C++ benchmarks build; kmean passes with I-cache, D-cache, and L2 statistics"
+fi
 
-cp "$materials/homeworks/hw3/test_mmm_inter.c" "$test_root/test_mmm_inter.c"
-cp "$materials/homeworks/hw3/test_mmm_block.c" "$test_root/test_mmm_block.c"
-gcc -O3 -o "$test_root/test_mmm_inter" "$test_root/test_mmm_inter.c" -lrt
-gcc -O3 -o "$test_root/test_mmm_block" "$test_root/test_mmm_block.c" -lrt
-sed -e 's/^#define ITERS .*/#define ITERS 1/' \
-    -e 's/^#define DELTA .*/#define DELTA 16/' \
-    "$test_root/test_mmm_inter.c" >"$test_root/test_mmm_inter-smoke.c"
-sed -e 's/^#define MLENGTH .*/#define MLENGTH 32/' \
-    -e 's/^#define BITERS .*/#define BITERS 2/' \
-    -e 's/^#define BBASE .*/#define BBASE 4/' \
-    "$test_root/test_mmm_block.c" >"$test_root/test_mmm_block-smoke.c"
-gcc -O3 -o "$test_root/test_mmm_inter-smoke" "$test_root/test_mmm_inter-smoke.c" -lrt
-gcc -O3 -o "$test_root/test_mmm_block-smoke" "$test_root/test_mmm_block-smoke.c" -lrt
-timeout 30s "$test_root/test_mmm_inter-smoke" >"$test_root/test_mmm_inter.log"
-timeout 30s "$test_root/test_mmm_block-smoke" >"$test_root/test_mmm_block.log"
-grep -Fq 'length, N^3, ijk, kij, jki' "$test_root/test_mmm_inter.log"
-grep -Fq 'bsize = 8' "$test_root/test_mmm_block.log"
-echo "Homework 3: both native programs compile and reduced-size executions complete; timing values remain host-dependent"
+if [[ -d "$materials/homeworks/hw3" ]]; then
+  cp "$materials/homeworks/hw3/test_mmm_inter.c" "$test_root/test_mmm_inter.c"
+  cp "$materials/homeworks/hw3/test_mmm_block.c" "$test_root/test_mmm_block.c"
+  gcc -O3 -o "$test_root/test_mmm_inter" "$test_root/test_mmm_inter.c" -lrt
+  gcc -O3 -o "$test_root/test_mmm_block" "$test_root/test_mmm_block.c" -lrt
+  sed -e 's/^#define ITERS .*/#define ITERS 1/' \
+      -e 's/^#define DELTA .*/#define DELTA 16/' \
+      "$test_root/test_mmm_inter.c" >"$test_root/test_mmm_inter-smoke.c"
+  sed -e 's/^#define MLENGTH .*/#define MLENGTH 32/' \
+      -e 's/^#define BITERS .*/#define BITERS 2/' \
+      -e 's/^#define BBASE .*/#define BBASE 4/' \
+      "$test_root/test_mmm_block.c" >"$test_root/test_mmm_block-smoke.c"
+  gcc -O3 -o "$test_root/test_mmm_inter-smoke" "$test_root/test_mmm_inter-smoke.c" -lrt
+  gcc -O3 -o "$test_root/test_mmm_block-smoke" "$test_root/test_mmm_block-smoke.c" -lrt
+  timeout 30s "$test_root/test_mmm_inter-smoke" >"$test_root/test_mmm_inter.log"
+  timeout 30s "$test_root/test_mmm_block-smoke" >"$test_root/test_mmm_block.log"
+  grep -Fq 'length, N^3, ijk, kij, jki' "$test_root/test_mmm_inter.log"
+  grep -Fq 'bsize = 8' "$test_root/test_mmm_block.log"
+  echo "Homework 3: both native programs compile and reduced-size executions complete; timing values remain host-dependent"
+fi
 
 prepare-workspace
-test -s /workspace/handouts/homework3.pdf
-test -f /workspace/homeworks/hw1/rv32_addi.circ
-test -f /workspace/homeworks/hw2/benchmarks/Makefile
-test -f /workspace/homeworks/hw3/test_mmm_inter.c
-echo "Workspace: labs, homeworks, and handouts copy into student-writable storage"
+while IFS= read -r released_path || [[ -n "$released_path" ]]; do
+  released_path=${released_path%$'\r'}
+  [[ -z "$released_path" || "$released_path" == \#* ]] && continue
+  test -e "/workspace/$released_path"
+done < "$release_manifest"
+echo "Workspace: every released material copies into student-writable storage"
 
 echo "ELEC3441 student image verification passed"
