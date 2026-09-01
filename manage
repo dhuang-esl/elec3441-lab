@@ -10,7 +10,7 @@ workspace="$script_dir/student-materials"
 if [[ -n "${ELEC3441_IMAGE:-}" ]]; then
   image=$ELEC3441_IMAGE
 elif [[ -s "$image_ref_file" ]]; then
-  read -r image < "$image_ref_file"
+  IFS= read -r image < "$image_ref_file" || [[ -n "$image" ]]
 else
   image=$local_image
 fi

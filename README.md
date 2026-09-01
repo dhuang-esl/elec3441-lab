@@ -81,7 +81,6 @@ When the teaching team announces new material, run these commands from the clone
 ```sh
 git status
 git pull
-./manage verify
 ./manage up
 ```
 
