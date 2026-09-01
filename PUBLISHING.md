@@ -24,8 +24,9 @@ git tag v2026.1
 git push origin v2026.1
 ```
 
-The `Publish course image` GitHub Actions workflow builds both AMD64 and ARM64
-images and publishes them to `ghcr.io/dhuang-esl/elec3441-lab`.
+The `Publish course image` GitHub Actions workflow builds AMD64 and ARM64 on
+separate native GitHub runners, assembles one multi-platform image, and
+publishes it to `ghcr.io/dhuang-esl/elec3441-lab`.
 
 For the first release, open the package settings on GitHub and change the
 package visibility to Public. Public visibility lets students pull the image
