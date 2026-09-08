@@ -2,6 +2,8 @@
 .github
 **/.DS_Store
 ELEC3441_Docker_Quick_Start.docx
+ELEC3441_Docker_Quick_Start.md
+docs/images/docker-quick-start/
 PUBLISHING.md
 README.md
 image.ref

@@ -8,7 +8,7 @@ The published image supports Intel/AMD and Apple Silicon. Its graphical tools ru
 
 The repository releases course materials progressively. The host directory `student-materials` is mounted directly at `/workspace` inside the container, so edits made in either place are the same files.
 
-For platform-specific installation instructions, see [ELEC3441 Docker Quick Start](ELEC3441_Docker_Quick_Start.docx).
+For platform-specific installation instructions, see [ELEC3441 Docker Quick Start](ELEC3441_Docker_Quick_Start.md).
 
 ## Start the course environment
 
