@@ -1,3 +1,5 @@
 # Add a file or directory here when it is released to students.
 handouts/lab1.pdf
 labs/lab1
+handouts/lab2.pdf
+labs/lab2
