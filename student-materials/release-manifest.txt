@@ -3,3 +3,5 @@ handouts/lab1.pdf
 labs/lab1
 handouts/lab2.pdf
 labs/lab2
+handouts/lab3.pdf
+labs/lab3
