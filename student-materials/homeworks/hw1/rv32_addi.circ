@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project source="3.7.2" version="1.0">
-  This file is intended to be loaded by Logisim-evolution v3.7.2(https://github.com/logisim-evolution/).
+<project source="4.1.0" version="1.0">
+  This file is intended to be loaded by Logisim-evolution v4.1.0(https://github.com/logisim-evolution/).
 
   <lib desc="#Wiring" name="0">
     <tool name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
     </tool>
     <tool name="Probe">
       <a name="appearance" val="classic"/>
@@ -20,9 +19,10 @@
   <lib desc="#Gates" name="1"/>
   <lib desc="#Plexers" name="2"/>
   <lib desc="#Arithmetic" name="3"/>
-  <lib desc="#Memory" name="4"/>
-  <lib desc="#I/O" name="5"/>
-  <lib desc="#HDL-IP" name="6">
+  <lib desc="#FPArithmetic" name="4"/>
+  <lib desc="#Memory" name="5"/>
+  <lib desc="#I/O" name="6"/>
+  <lib desc="#HDL-IP" name="7">
     <tool name="VHDL Entity">
       <a name="content">--------------------------------------------------------------------------------
 -- HEIG-VD, institute REDS, 1400 Yverdon-les-Bains
@@ -65,14 +65,14 @@ end type_architecture;
 </a>
     </tool>
   </lib>
-  <lib desc="#TCL" name="7"/>
-  <lib desc="#Base" name="8">
+  <lib desc="#TCL" name="8"/>
+  <lib desc="#Base" name="9">
     <tool name="Text Tool">
       <a name="font" val="SansSerif plain 12"/>
     </tool>
   </lib>
-  <lib desc="#BFH-Praktika" name="9"/>
-  <lib desc="file#uproclib.circ" name="10"/>
+  <lib desc="#BFH-Praktika" name="10"/>
+  <lib desc="file#uproclib.circ" name="11"/>
   <main name="main"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
@@ -80,21 +80,21 @@ end type_architecture;
     <a name="simrand" val="0"/>
   </options>
   <mappings>
-    <tool lib="8" map="Button2" name="Menu Tool"/>
-    <tool lib="8" map="Button3" name="Menu Tool"/>
-    <tool lib="8" map="Ctrl Button1" name="Menu Tool"/>
+    <tool lib="9" map="Button2" name="Menu Tool"/>
+    <tool lib="9" map="Button3" name="Menu Tool"/>
+    <tool lib="9" map="Ctrl Button1" name="Menu Tool"/>
   </mappings>
   <toolbar>
-    <tool lib="8" name="Poke Tool"/>
-    <tool lib="8" name="Edit Tool"/>
-    <tool lib="8" name="Text Tool">
+    <tool lib="9" name="Poke Tool"/>
+    <tool lib="9" name="Edit Tool"/>
+    <tool lib="9" name="Text Tool">
       <a name="font" val="SansSerif plain 12"/>
     </tool>
     <sep/>
     <tool lib="0" name="Pin"/>
     <tool lib="0" name="Pin">
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </tool>
     <tool lib="1" name="NOT Gate"/>
     <tool lib="1" name="AND Gate"/>
@@ -361,67 +361,67 @@ end type_architecture;
     <comp lib="0" loc="(2180,1060)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1150)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1240)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1330)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1420)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1510)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,1600)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,700)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,790)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,880)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2180,970)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(2210,540)" name="Tunnel">
@@ -466,12 +466,14 @@ end type_architecture;
       <a name="fanout" val="1"/>
       <a name="incoming" val="32"/>
     </comp>
-    <comp lib="0" loc="(50,580)" name="Clock"/>
+    <comp lib="0" loc="(50,580)" name="Clock">
+      <a name="appearance" val="classic"/>
+    </comp>
     <comp lib="0" loc="(70,560)" name="Constant"/>
     <comp lib="0" loc="(730,230)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(790,470)" name="Tunnel">
       <a name="label" val="alu_fun"/>
@@ -488,8 +490,8 @@ end type_architecture;
       <a name="facing" val="north"/>
       <a name="label" val="clk"/>
     </comp>
-    <comp lib="10" loc="(1140,410)" name="rf32"/>
-    <comp lib="10" loc="(1450,730)" name="alu"/>
+    <comp lib="11" loc="(1140,410)" name="rf32"/>
+    <comp lib="11" loc="(1450,730)" name="alu"/>
     <comp lib="2" loc="(2230,460)" name="Multiplexer">
       <a name="select" val="3"/>
       <a name="width" val="32"/>
@@ -497,18 +499,18 @@ end type_architecture;
     <comp lib="3" loc="(240,440)" name="Adder">
       <a name="width" val="32"/>
     </comp>
-    <comp lib="4" loc="(110,510)" name="Register">
+    <comp lib="5" loc="(110,510)" name="Register">
       <a name="appearance" val="logisim_evolution"/>
       <a name="width" val="32"/>
     </comp>
-    <comp lib="4" loc="(1670,440)" name="RAM">
+    <comp lib="5" loc="(1670,440)" name="RAM">
       <a name="addrWidth" val="14"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="asyncread" val="true"/>
       <a name="dataWidth" val="32"/>
       <a name="label" val="data_ram"/>
     </comp>
-    <comp lib="4" loc="(320,520)" name="ROM">
+    <comp lib="5" loc="(320,520)" name="ROM">
       <a name="addrWidth" val="14"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 14 32
@@ -631,13 +633,13 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="halt"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </comp>
     <comp lib="3" loc="(430,170)" name="Comparator">
       <a name="mode" val="unsigned"/>
       <a name="width" val="32"/>
     </comp>
-    <comp lib="8" loc="(319,200)" name="Text">
+    <comp lib="9" loc="(315,200)" name="Text">
       <a name="text" val="ebreak"/>
     </comp>
     <wire from="(220,160)" to="(390,160)"/>
@@ -756,7 +758,7 @@ end type_architecture;
     <comp lib="0" loc="(190,980)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="op2_sel"/>
-      <a name="width" val="3"/>
+      <a name="width" val="2"/>
     </comp>
     <comp lib="0" loc="(230,370)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -810,35 +812,35 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="s_im"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(420,1280)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="sb_im"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(420,1370)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="i_im"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(420,1460)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="u_im"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(420,1550)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="j_im"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(430,240)" name="Splitter">
@@ -859,21 +861,21 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="rs1"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(430,690)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="rs2"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(430,730)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="rd"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(440,190)" name="Tunnel">
@@ -884,7 +886,7 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="alu_fun"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="3"/>
     </comp>
     <comp lib="0" loc="(450,290)" name="Splitter">
@@ -896,26 +898,26 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ld_en"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(460,1040)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="sw_en"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(460,1070)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="pc_sel"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="2"/>
     </comp>
     <comp lib="0" loc="(460,1100)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="rf_we"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(460,240)" name="Tunnel">
       <a name="label" val="rs2"/>
@@ -925,15 +927,15 @@ end type_architecture;
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="wb_sel"/>
-      <a name="output" val="true"/>
+      <a name="type" val="output"/>
       <a name="width" val="3"/>
     </comp>
     <comp lib="0" loc="(460,980)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="op2_sel"/>
-      <a name="output" val="true"/>
-      <a name="width" val="3"/>
+      <a name="type" val="output"/>
+      <a name="width" val="2"/>
     </comp>
     <comp lib="0" loc="(470,290)" name="Tunnel">
       <a name="label" val="fun7"/>
@@ -1110,16 +1112,16 @@ end type_architecture;
     <comp lib="3" loc="(710,910)" name="Comparator">
       <a name="width" val="7"/>
     </comp>
-    <comp lib="8" loc="(837,463)" name="Text">
+    <comp lib="9" loc="(835,460)" name="Text">
       <a name="text" val="When the instruction is SUB"/>
     </comp>
-    <comp lib="8" loc="(837,63)" name="Text">
+    <comp lib="9" loc="(835,60)" name="Text">
       <a name="text" val="When the instruction is ADD"/>
     </comp>
-    <comp lib="8" loc="(837,643)" name="Text">
+    <comp lib="9" loc="(835,640)" name="Text">
       <a name="text" val="When the instruction is AND"/>
     </comp>
-    <comp lib="8" loc="(837,823)" name="Text">
+    <comp lib="9" loc="(835,820)" name="Text">
       <a name="text" val="When the instruction is OR"/>
     </comp>
     <wire from="(1150,130)" to="(1270,130)"/>
