@@ -5,3 +5,5 @@ handouts/lab2.pdf
 labs/lab2
 handouts/lab3.pdf
 labs/lab3
+handouts/homework1.pdf
+homeworks/hw1
