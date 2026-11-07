@@ -1,6 +1,6 @@
 # ELEC3441 course environment
 
-This repository provides the verified ELEC3441 Linux environment and releases course materials progressively. The current release contains Lab 1. Later labs and homework will be added when they are announced.
+This repository provides the verified ELEC3441 Linux environment and releases course materials progressively. Available materials are listed in the [release manifest](student-materials/release-manifest.txt). Follow the relevant handout when the teaching team announces a release.
 
 Its published Docker image pins the RISC-V GNU C/C++ toolchain, Spike and the RV32 proxy kernel, RARS, Logisim-Evolution, and Ripes. It also includes native GCC, Git, and Python with Matplotlib.
 

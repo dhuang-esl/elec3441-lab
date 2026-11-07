@@ -9,3 +9,5 @@ handouts/homework1.pdf
 homeworks/hw1
 handouts/lab4.pdf
 labs/lab4
+handouts/homework2.pdf
+homeworks/hw2

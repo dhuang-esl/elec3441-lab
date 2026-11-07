@@ -1,0 +1,10 @@
+# Local build outputs; keep sources and datasets in Git.
+*.o
+/benchmarks/bfs_matrix/bfs_matrix
+/benchmarks/bfs_pointer/bfs_pointer
+/benchmarks/conv2D/conv2D
+/benchmarks/fir/fir
+/benchmarks/kmean/kmean
+/benchmarks/mm/mm
+/benchmarks/quicksort/quicksort
+/benchmarks/sobel/sobel
