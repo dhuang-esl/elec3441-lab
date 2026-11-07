@@ -7,3 +7,5 @@ handouts/lab3.pdf
 labs/lab3
 handouts/homework1.pdf
 homeworks/hw1
+handouts/lab4.pdf
+labs/lab4
